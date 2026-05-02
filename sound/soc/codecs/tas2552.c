@@ -4,6 +4,15 @@
  * Copyright (C) 2014 Texas Instruments Incorporated -  http://www.ti.com
  *
  * Author: Dan Murphy <dmurphy@ti.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  */
 
 #include <linux/module.h>
@@ -15,7 +24,6 @@
 #include <linux/pm_runtime.h>
 #include <linux/regmap.h>
 #include <linux/slab.h>
-#include <linux/delay.h>
 
 #include <linux/regulator/consumer.h>
 
@@ -74,8 +82,8 @@ static const char *tas2552_input_texts[] = {
 	"Digital", "Analog"
 };
 
-static SOC_ENUM_SINGLE_DECL(tas2552_input_mux_enum, TAS2552_CFG_3, 7,
-			    tas2552_input_texts);
+static const struct soc_enum tas2552_input_mux_enum =
+	SOC_ENUM_SINGLE(TAS2552_CFG_3, 7, 2, tas2552_input_texts);
 
 static const struct snd_kcontrol_new tas2552_input_mux_control[] = {
 	SOC_DAPM_ENUM("Input selection", tas2552_input_mux_enum)
@@ -281,8 +289,6 @@ static int tas2552_runtime_resume(struct device *dev)
 	if (gpio_is_valid(tas2552->enable_gpio))
 		gpio_set_value(tas2552->enable_gpio, 1);
 
-	msleep(50);
-
 	tas2552_sw_shutdown(tas2552, 1);
 
 	regcache_cache_only(tas2552->regmap, false);
@@ -354,14 +360,8 @@ static int tas2552_codec_probe(struct snd_soc_codec *codec)
 		return ret;
 	}
 
-	msleep(20);
-
-	if (gpio_is_valid(tas2552->enable_gpio)) {
-		gpio_set_value(tas2552->enable_gpio, 0);
-		msleep(20);
+	if (gpio_is_valid(tas2552->enable_gpio))
 		gpio_set_value(tas2552->enable_gpio, 1);
-		msleep(50);
-	}
 
 	ret = pm_runtime_get_sync(codec->dev);
 	if (ret < 0) {
@@ -385,7 +385,7 @@ static int tas2552_codec_probe(struct snd_soc_codec *codec)
 	if (ret != 0) {
 		dev_err(codec->dev, "Failed to write init registers: %d\n",
 			ret);
-		/* goto patch_fail; */
+		goto patch_fail;
 	}
 
 	snd_soc_write(codec, TAS2552_CFG_2, TAS2552_BOOST_EN |
@@ -478,33 +478,33 @@ static const struct regmap_config tas2552_regmap_config = {
 static int tas2552_probe(struct i2c_client *client,
 			   const struct i2c_device_id *id)
 {
-	struct device *dev;
+	struct device *dev = &client->dev;
 	struct tas2552_data *data;
 	int ret;
 	int i;
 
-	dev = &client->dev;
-	data = devm_kzalloc(&client->dev, sizeof(*data), GFP_KERNEL);
+	data = devm_kzalloc(dev, sizeof(*data), GFP_KERNEL);
 	if (data == NULL)
 		return -ENOMEM;
 
-//	data->enable_gpio = of_get_named_gpio(dev->of_node, "enable-gpio", 0);
-	data->enable_gpio = -EINVAL;
+	data->enable_gpio = -1;
+	if (dev->of_node)
+		data->enable_gpio = of_get_named_gpio(dev->of_node, "enable-gpio", 0);
+
 	if (gpio_is_valid(data->enable_gpio)) {
 		ret = devm_gpio_request_one(dev, data->enable_gpio,
-					    GPIOF_OUT_INIT_LOW, "tas2552_en");
-		if (ret)
+					    GPIOF_OUT_INIT_LOW, "tas2552_enable");
+		if (ret < 0) {
+			pr_err("TAS2552: ERROR take GPIO %d: code %d\n", data->enable_gpio, ret);
 			return ret;
-	} else {
-		data->enable_gpio = -EINVAL;
+		}
 	}
 
 	data->tas2552_client = client;
 	data->regmap = devm_regmap_init_i2c(client, &tas2552_regmap_config);
 	if (IS_ERR(data->regmap)) {
 		ret = PTR_ERR(data->regmap);
-		dev_err(&client->dev, "Failed to allocate register map: %d\n",
-			ret);
+		pr_err("TAS2552: ERROR when initialization regmap: code %d", ret);
 		return ret;
 	}
 
@@ -514,7 +514,7 @@ static int tas2552_probe(struct i2c_client *client,
 	ret = devm_regulator_bulk_get(dev, ARRAY_SIZE(data->supplies),
 				      data->supplies);
 	if (ret != 0) {
-		dev_err(dev, "Failed to request supplies: %d\n", ret);
+		pr_err("TAS2552: ERROR regulators request (vbat/iovdd/avdd): code %d", ret);
 		return ret;
 	}
 
@@ -531,7 +531,9 @@ static int tas2552_probe(struct i2c_client *client,
 				      &soc_codec_dev_tas2552,
 				      tas2552_dai, ARRAY_SIZE(tas2552_dai));
 	if (ret < 0)
-		dev_err(&client->dev, "Failed to register codec: %d\n", ret);
+		pr_err("TAS2552: ERROR on registration codec in ASoC: code: %d", ret);
+	else
+		pr_err("TAS2552: SUCCESS! Driver is loaded!\n");
 
 	return ret;
 }
@@ -570,6 +572,6 @@ static struct i2c_driver tas2552_i2c_driver = {
 
 module_i2c_driver(tas2552_i2c_driver);
 
-MODULE_AUTHOR("Dan Muprhy <dmurphy@ti.com>");
+MODULE_AUTHOR("Dan Murphy <dmurphy@ti.com>");
 MODULE_DESCRIPTION("TAS2552 Audio amplifier driver");
 MODULE_LICENSE("GPL");
