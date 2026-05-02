@@ -51,6 +51,21 @@
 		asoc-codec = <&stub_codec>;
 		asoc-codec-names = "msm-stub-codec.1";
 	};
+
+        i2c@f9924000 { /* BLSP1 QUP2 */
+                status = "ok";
+		#address-cells = <1>;
+		#size-cells = <0>;
+                tas2552@40 {
+                        reg = <0x40>;
+                        compatible = "ti,tas2552";
+                        
+			enable-gpio = <&pmi8994_gpios 12 0x00>;
+			vbat-supply = <&pm8994_s4>;
+			iovdd-supply = <&pm8994_l11>;
+			avdd-supply = <&pm8994_s5>;
+                };
+	};
 };
 
 &slim_msm {
