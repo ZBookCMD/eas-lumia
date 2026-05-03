@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
 
@@ -45,10 +45,10 @@
 		 interrupt-names = "qup_irq";
 		 interrupts = <0 95 0>;
 		 qcom,clk-freq-out = <400000>;
-		 qcom,clk-freq-in= <19200000>;
+		 qcom,clk-freq-in  = <19200000>;
 		 clock-names = "iface_clk", "core_clk";
 		 clocks = <&clock_gcc clk_gcc_blsp1_ahb_clk>,
-			<&clock_gcc clk_gcc_blsp1_qup1_i2c_apps_clk>;
+			  <&clock_gcc clk_gcc_blsp1_qup1_i2c_apps_clk>;
  
 		 pinctrl-names = "i2c_active", "i2c_sleep";
 		 pinctrl-0 = <&i2c_1_active>;
@@ -170,14 +170,14 @@
 	 };
  
 	 gpio@c700 { /* GPIO 8 */
-		 qcom,mode = <0>;/* Digital in */
-		 qcom,pull = <0>;/* PULL up 30uA */
-		 qcom,output-type = <0>; /* CMOS logic */
-		 qcom,invert = <1>;/* Output high */
-		 qcom,vin-sel = <2>; /* Logical 1 voltage value 1.8v */
-		 qcom,src-sel = <0>; /* Constant */
-		 qcom,out-strength = <1>;/* Low drive strength */
-		 qcom,master-en = <1>; /* Enable GPIO */
+		 qcom,mode = <0>;                /* Digital in */
+		 qcom,pull = <0>;                /* PULL up 30uA */
+		 qcom,output-type = <0>;         /* CMOS logic */
+		 qcom,invert = <1>;              /* Output high */
+		 qcom,vin-sel = <2>;             /* Logical 1 voltage value 1.8v */
+		 qcom,src-sel = <0>;             /* Constant */
+		 qcom,out-strength = <1>;        /* Low drive strength */
+		 qcom,master-en = <1>;           /* Enable GPIO */
 		 status = "okay";
 	 };
  
@@ -245,16 +245,16 @@
 	 };
 
 	 gpio@cb00 { /* GPIO 12 - TAS2552 IHF_LEFT_EN */
-		 qcom,mode = <1>;		/* Digital out */
-		 qcom,pull = <5>;		/* QPNP_PIN_PULL_NO */
-		 qcom,output-type = <0>;	/* CMOS logic */
-		 qcom,invert = <1>;		/* Output high */
-		 qcom,vin-sel = <2>;		/* Logical 1 voltage value 1.8v */
-		 qcom,src-sel = <0>;		/* Constant */
-		 qcom,out-strength = <1>;	/* Low drive strength */
-		 qcom,master-en = <1>;		/* Enable GPIO */
-		 status = "okay";
-	 };
+                 qcom,mode = <1>;                /* Digital out */
+                 qcom,pull = <5>;                /* QPNP_PIN_PULL_NO */
+                 qcom,output-type = <0>;         /* CMOS logic */
+                 qcom,invert = <1>;              /* Output high */
+                 qcom,vin-sel = <2>;             /* Logical 1 voltage value 1.8v */
+                 qcom,src-sel = <0>;             /* Constant */
+                 qcom,out-strength = <1>;        /* Low drive strength */
+                 qcom,master-en = <1>;           /* Enable GPIO */
+                 status = "okay";
+         };
  };
  
  &pm8994_mpps {
@@ -281,7 +281,7 @@
  
  
  &pmi8994_gpios {
-	 gpio@c400 {	/* GPIO 5OTG SWITCH EN */
+	 gpio@c400 {	/* GPIO 5  OTG SWITCH EN */
 		 qcom,mode = <1>;	/* DIGITAL OUT */
 		 qcom,pull = <5>;	/* No Pull */
 		 qcom,vin-sel = <2>;	/* 1.8 */

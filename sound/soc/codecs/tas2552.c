@@ -432,8 +432,6 @@ static int tas2552_hw_params(struct snd_pcm_substream *substream,
 	struct tas2552_priv *tas2552 = snd_soc_codec_get_drvdata(codec);
 	unsigned int value = 0;
 
-	// EXPERIMENTAL
-	// Needed hardcode sysclk, cause driver fails when tryin to calculate it
 	tas2552->sysclk = 1536000;
 	pr_err("TAS2552: HARDCODING SYSCLK TO %u\n", tas2552->sysclk);
 

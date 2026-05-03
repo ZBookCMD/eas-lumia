@@ -325,8 +325,7 @@ config SND_SOC_STAC9766
 	tristate
 
 config SND_SOC_TAS2552
-	tristate "Texas Instruments TAS2552 Mono Audio amplifier"
-	depends on I2C
+	tristate "Texas Instruments TAS2552 codec"
 
 config SND_SOC_TAS5086
 	tristate

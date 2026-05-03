@@ -153,5 +153,16 @@
 				bias-pull-down;
 			};
 		};
+
+		pmx_tas2552_en: pmx_tas2552_en {
+			qcom,pins = <&gp 68>;
+			qcom,num-grp-pins = <1>;
+			qcom,pin-func = <0>; /* Режим GPIO */
+			label = "tas2552-en";
+			tas2552_en_active: active {
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
 	};
 };
